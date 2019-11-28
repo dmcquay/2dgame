@@ -11,5 +11,7 @@ function buildInitialState() {
 
 export function run() {
   const state = buildInitialState();
-  render(state);
+  const renderWithArgs = () => render(state);
+  setInterval(renderWithArgs, 1000);
+  window.addEventListener("resize", renderWithArgs);
 }

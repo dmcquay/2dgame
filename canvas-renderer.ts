@@ -1,11 +1,11 @@
 export function render(state: any) {
   const canvas = document.getElementById("canvas");
-  sizeCanvas(canvas);
+  updateCanvasSize(canvas);
   const ctx = (canvas as any).getContext("2d");
   renderGrid(canvas, ctx);
 }
 
-function sizeCanvas(canvas: any) {
+function updateCanvasSize(canvas: any) {
   if (canvas.width != document.body.clientWidth) {
     canvas.width = document.body.clientWidth;
   }
@@ -34,9 +34,6 @@ function renderGrid(canvas: any, ctx: any) {
       renderCell(x, y, ctx, canvas);
     }
   }
-
-  // create a grid of cells (bounding boxes)
-  // must be able to correspond to cells in game state
 }
 
 const colors = [
@@ -57,6 +54,5 @@ function renderCell(cellX: number, cellY: number, ctx: any, canvas: any) {
   ctx.fillStyle = color;
   const x = Math.floor(canvas.width / 2) + cellX * cellSize - cellSize / 2;
   const y = Math.floor(canvas.height / 2) + cellY * cellSize - cellSize / 2;
-  console.log({ x, y, cellSize, color });
   ctx.fillRect(x, y, cellSize, cellSize);
 }
