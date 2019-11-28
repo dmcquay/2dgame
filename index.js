@@ -1,4 +1,6 @@
-// import another component
-import main from './main';
+import { run } from "./game";
 
-main();
+// import classes from "./main.css";
+// console.log(classes.main);
+
+run();
