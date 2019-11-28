@@ -7,6 +7,14 @@
     "start": "parcel index.html"
   },
   "dependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.2",
     "parcel": "^1.12.4"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.5",
+    "@types/mocha": "^5.2.7",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^3.7.2"
   }
 }
