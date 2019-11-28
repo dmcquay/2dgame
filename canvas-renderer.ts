@@ -1,11 +1,13 @@
-export function render(state: any) {
-  const canvas = document.getElementById("canvas");
+import { GameState } from "./game";
+
+export function render(state: GameState) {
+  const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   updateCanvasSize(canvas);
-  const ctx = (canvas as any).getContext("2d");
+  const ctx = canvas.getContext("2d");
   renderGrid(canvas, ctx);
 }
 
-function updateCanvasSize(canvas: any) {
+function updateCanvasSize(canvas: HTMLCanvasElement) {
   if (canvas.width != document.body.clientWidth) {
     canvas.width = document.body.clientWidth;
   }
@@ -14,13 +16,10 @@ function updateCanvasSize(canvas: any) {
   }
 }
 
-function renderGrid(canvas: any, ctx: any) {
+function renderGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
   const cellSize = 100;
-  const width = canvas.width;
-  const height = canvas.height;
   const cellsWide = Math.ceil(canvas.width / cellSize); // assert odd
   const cellsTall = Math.ceil(canvas.height / cellSize); // assert odd
-  console.log({ cellSize, cellsWide, cellsTall, width, height });
   for (
     let x = Math.floor(cellsWide / 2) * -1;
     x <= Math.floor(cellsWide / 2);
@@ -48,7 +47,12 @@ const colors = [
   "gray"
 ];
 
-function renderCell(cellX: number, cellY: number, ctx: any, canvas: any) {
+function renderCell(
+  cellX: number,
+  cellY: number,
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement
+) {
   const cellSize = 100;
   const color = colors[Math.floor(Math.random() * colors.length)];
   ctx.fillStyle = color;
