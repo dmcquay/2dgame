@@ -1,5 +1,9 @@
 import { GameState } from "./game";
-import { RenderingContext, getCellCoords } from "./render-utils";
+import {
+  RenderingContext,
+  getCellCoords,
+  getVisibleCells
+} from "./render-utils";
 
 const CELL_SIZE = 100;
 
@@ -17,7 +21,7 @@ export function render(state: GameState) {
     canvasHeight: canvas.height,
     cellSize: CELL_SIZE
   };
-  renderGrid(canvas, ctx, renderingContext);
+  renderGrid(ctx, renderingContext);
   renderPlayer(state, ctx, renderingContext);
 }
 
@@ -31,25 +35,11 @@ function updateCanvasSize(canvas: HTMLCanvasElement) {
 }
 
 function renderGrid(
-  canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
-  renderingContext
+  renderingContext: RenderingContext
 ) {
-  const cellsWide = Math.ceil(canvas.width / CELL_SIZE); // assert odd
-  const cellsTall = Math.ceil(canvas.height / CELL_SIZE); // assert odd
-  for (
-    let x = Math.floor(cellsWide / 2) * -1;
-    x <= Math.floor(cellsWide / 2);
-    x += 1
-  ) {
-    for (
-      let y = Math.floor(cellsTall / 2) * -1;
-      y <= Math.floor(cellsTall / 2);
-      y += 1
-    ) {
-      renderCellBackground([x, y], ctx, renderingContext);
-    }
-  }
+  const cells = getVisibleCells(renderingContext);
+  cells.forEach(cell => renderCellBackground(cell, ctx, renderingContext));
 }
 
 function renderPlayer(
