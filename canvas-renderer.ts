@@ -1,4 +1,7 @@
 import { GameState } from "./game";
+import { RenderingContext, getCellCoords } from "./render-utils";
+
+const CELL_SIZE = 100;
 
 const playerImg = new Image();
 playerImg.src = "/static/images/link.png";
@@ -9,8 +12,13 @@ export function render(state: GameState) {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   updateCanvasSize(canvas);
   const ctx = canvas.getContext("2d");
-  renderGrid(canvas, ctx);
-  renderPlayer(0, 0, ctx, canvas);
+  const renderingContext = {
+    canvasWidth: canvas.width,
+    canvasHeight: canvas.height,
+    cellSize: CELL_SIZE
+  };
+  renderGrid(canvas, ctx, renderingContext);
+  renderPlayer(state, ctx, renderingContext);
 }
 
 function updateCanvasSize(canvas: HTMLCanvasElement) {
@@ -22,10 +30,13 @@ function updateCanvasSize(canvas: HTMLCanvasElement) {
   }
 }
 
-function renderGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
-  const cellSize = 100;
-  const cellsWide = Math.ceil(canvas.width / cellSize); // assert odd
-  const cellsTall = Math.ceil(canvas.height / cellSize); // assert odd
+function renderGrid(
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  renderingContext
+) {
+  const cellsWide = Math.ceil(canvas.width / CELL_SIZE); // assert odd
+  const cellsTall = Math.ceil(canvas.height / CELL_SIZE); // assert odd
   for (
     let x = Math.floor(cellsWide / 2) * -1;
     x <= Math.floor(cellsWide / 2);
@@ -36,22 +47,19 @@ function renderGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
       y <= Math.floor(cellsTall / 2);
       y += 1
     ) {
-      renderCell(x, y, ctx, canvas);
+      renderCellBackground([x, y], ctx, renderingContext);
     }
   }
 }
 
 function renderPlayer(
-  cellX: number,
-  cellY: number,
+  state: GameState,
   ctx: CanvasRenderingContext2D,
-  canvas: HTMLCanvasElement
+  renderingContext: RenderingContext
 ) {
-  const cellSize = 100;
   if (!playerImgIsReady) return;
-  const x = canvas.width / 2 - cellSize / 2;
-  const y = canvas.height / 2 - cellSize / 2;
-  ctx.drawImage(playerImg, x, y, cellSize, cellSize);
+  const [x, y] = getCellCoords(state.playerCell, renderingContext);
+  ctx.drawImage(playerImg, x, y, CELL_SIZE, CELL_SIZE);
 }
 
 const colors = [
@@ -66,16 +74,13 @@ const colors = [
   "gray"
 ];
 
-function renderCell(
-  cellX: number,
-  cellY: number,
+function renderCellBackground(
+  cell: [number, number],
   ctx: CanvasRenderingContext2D,
-  canvas: HTMLCanvasElement
+  renderingContext: RenderingContext
 ) {
-  const cellSize = 100;
   const color = colors[Math.floor(Math.random() * colors.length)];
   ctx.fillStyle = color;
-  const x = Math.floor(canvas.width / 2) + cellX * cellSize - cellSize / 2;
-  const y = Math.floor(canvas.height / 2) + cellY * cellSize - cellSize / 2;
-  ctx.fillRect(x, y, cellSize, cellSize);
+  const [x, y] = getCellCoords(cell, renderingContext);
+  ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
 }
