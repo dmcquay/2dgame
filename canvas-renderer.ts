@@ -1,10 +1,16 @@
 import { GameState } from "./game";
 
+const playerImg = new Image();
+playerImg.src = "//images/link.png";
+let playerImgIsReady = false;
+playerImg.addEventListener("load", e => (playerImgIsReady = true));
+
 export function render(state: GameState) {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   updateCanvasSize(canvas);
   const ctx = canvas.getContext("2d");
   renderGrid(canvas, ctx);
+  renderPlayer(0, 0, ctx);
 }
 
 function updateCanvasSize(canvas: HTMLCanvasElement) {
@@ -33,6 +39,15 @@ function renderGrid(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
       renderCell(x, y, ctx, canvas);
     }
   }
+}
+
+function renderPlayer(
+  cellX: number,
+  cellY: number,
+  ctx: CanvasRenderingContext2D
+) {
+  if (!playerImgIsReady) return;
+  ctx.drawImage(playerImg, 10, 10);
 }
 
 const colors = [
