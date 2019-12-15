@@ -1,28 +1,11 @@
-import { GameState } from "./game";
-import {
-  RenderingContext,
-  getCellCoords,
-  getVisibleCells
-} from "./render-utils";
-
-const CELL_SIZE = 100;
-
-const playerImg = new Image();
-playerImg.src = "/static/images/link.png";
-let playerImgIsReady = false;
-playerImg.addEventListener("load", e => (playerImgIsReady = true));
+import { GameState, PlayerState } from "./types";
 
 export function render(state: GameState) {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   updateCanvasSize(canvas);
   const ctx = canvas.getContext("2d");
-  const renderingContext = {
-    canvasWidth: canvas.width,
-    canvasHeight: canvas.height,
-    cellSize: CELL_SIZE
-  };
-  renderGrid(ctx, renderingContext);
-  renderPlayer(state, ctx, renderingContext);
+  clearCanvas(canvas, ctx);
+  state.players.forEach(player => renderPlayer(player, canvas, ctx));
 }
 
 function updateCanvasSize(canvas: HTMLCanvasElement) {
@@ -34,43 +17,23 @@ function updateCanvasSize(canvas: HTMLCanvasElement) {
   }
 }
 
-function renderGrid(
-  ctx: CanvasRenderingContext2D,
-  renderingContext: RenderingContext
-) {
-  const cells = getVisibleCells(renderingContext);
-  cells.forEach(cell => renderCellBackground(cell, ctx, renderingContext));
+function clearCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+function translateCoords(x: number, y: number, canvas: HTMLCanvasElement) {
+  return [x + Math.floor(canvas.width / 2), y + Math.floor(canvas.height / 2)];
 }
 
 function renderPlayer(
-  state: GameState,
-  ctx: CanvasRenderingContext2D,
-  renderingContext: RenderingContext
+  playerState: PlayerState,
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D
 ) {
-  if (!playerImgIsReady) return;
-  const [x, y] = getCellCoords(state.playerCell, renderingContext);
-  ctx.drawImage(playerImg, x, y, CELL_SIZE, CELL_SIZE);
-}
-
-const colors = [
-  "green",
-  "red",
-  "blue",
-  "orange",
-  "violet",
-  "yellow",
-  "black",
-  "white",
-  "gray"
-];
-
-function renderCellBackground(
-  cell: [number, number],
-  ctx: CanvasRenderingContext2D,
-  renderingContext: RenderingContext
-) {
-  const color = colors[Math.floor(Math.random() * colors.length)];
-  ctx.fillStyle = color;
-  const [x, y] = getCellCoords(cell, renderingContext);
-  ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+  const playerSize = 50;
+  const [x, y] = translateCoords(playerState.x, playerState.y, canvas);
+  ctx.fillStyle = playerState.color;
+  ctx.fillRect(x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
+  // ctx.drawImage(playerImg, x, y, CELL_SIZE, CELL_SIZE);
 }
