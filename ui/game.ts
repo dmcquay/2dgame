@@ -28,6 +28,8 @@ function customPrompt(message: string, cb: Function) {
   document.body.appendChild(container);
 }
 
+const keyIsDownMap: { [key: string]: boolean } = {};
+
 export function run() {
   const playerId = uuid.v4();
   console.log("starting game...");
@@ -69,19 +71,24 @@ export function run() {
   });
 
   window.addEventListener("keydown", event => {
-    console.log(event.key);
-    if (!/^Arrow[Up|Down|Left|Right]$/.test(event.key)) {
+    if (keyIsDownMap[event.key] === true) return;
+    keyIsDownMap[event.key] = true;
+    if (!/^Arrow(Up|Down|Left|Right)$/.test(event.key)) {
       return;
     }
     const direction = event.key.replace("Arrow", "").toLowerCase();
+    console.log("start moving", direction);
     socket.emit("startMoving", { direction });
   });
 
   window.addEventListener("keyup", event => {
-    if (!/^Arrow[Up|Down|Left|Right]$/.test(event.key)) {
+    if (keyIsDownMap[event.key] === false) return;
+    keyIsDownMap[event.key] = false;
+    if (!/^Arrow(Up|Down|Left|Right)$/.test(event.key)) {
       return;
     }
     const direction = event.key.replace("Arrow", "").toLowerCase();
+    console.log("stop moving", direction);
     socket.emit("stopMoving", { direction });
   });
 }

@@ -71,10 +71,24 @@ io.on("connection", client => {
     io.emit("playerJoined", { id, name });
     playerId = id;
   });
-  // client.on("startMoving", (data: any) => {
-  //   const { direction: string } = data;
-  //   R.set(R.lensPath([]));
-  // });
+  client.on("startMoving", (data: any) => {
+    const { direction } = data;
+    gameState = R.set(
+      R.lensPath(["players", playerId, "moving", direction]),
+      true,
+      gameState
+    );
+    io.emit("gameState", gameState);
+  });
+  client.on("stopMoving", (data: any) => {
+    const { direction } = data;
+    gameState = R.set(
+      R.lensPath(["players", playerId, "moving", direction]),
+      false,
+      gameState
+    );
+    io.emit("gameState", gameState);
+  });
   client.on("disconnect", () => {
     console.log("client disconnected");
     if (!gameState.players[playerId]) return;
@@ -88,6 +102,46 @@ io.on("connection", client => {
   });
 });
 io.listen(3001);
+
+function movePlayers() {
+  const playerIds = Object.keys(gameState.players);
+  const changed = playerIds.map(movePlayer);
+  if (changed.find(x => x === true)) {
+    io.emit("gameState", gameState);
+  }
+}
+
+const MOVE_PX_PER_INTERVAL = 5;
+
+function movePlayer(playerId: string) {
+  const player = gameState.players[playerId];
+
+  let x = player.x;
+  if (player.moving.left) {
+    x -= MOVE_PX_PER_INTERVAL;
+  } else if (player.moving.right) {
+    x += MOVE_PX_PER_INTERVAL;
+  }
+
+  let y = player.y;
+  if (player.moving.up) {
+    y -= MOVE_PX_PER_INTERVAL;
+  } else if (player.moving.down) {
+    y += MOVE_PX_PER_INTERVAL;
+  }
+
+  if (player.x !== x) {
+    gameState = R.set(R.lensPath(["players", playerId, "x"]), x, gameState);
+  }
+
+  if (player.y !== y) {
+    gameState = R.set(R.lensPath(["players", playerId, "y"]), y, gameState);
+  }
+
+  return player.x !== x || player.y !== y;
+}
+
+setInterval(movePlayers, 20);
 
 // start game, return game state
 // join game by id
