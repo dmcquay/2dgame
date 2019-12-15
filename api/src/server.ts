@@ -27,12 +27,12 @@ let gameState: GameState = {
   players: {}
 };
 
-const colors = ["red", "orange", "yellow", "green", "blue", "indigo", "violet"];
+function getCode() {
+  return Math.floor(Math.random() * 150);
+}
 
 function getAvailableColor() {
-  return colors.filter(
-    color => !Object.values(gameState.players).find(p => p.color === color)
-  )[0];
+  return `rgb(${getCode()}, ${getCode()}, ${getCode()})`;
 }
 
 const io = SocketIo();
