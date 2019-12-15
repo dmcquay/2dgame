@@ -32,15 +32,16 @@ const keyIsDownMap: { [key: string]: boolean } = {};
 
 export function run() {
   const playerId = uuid.v4();
-  const socket = io("http://localhost:3001");
+  const socket = io(`http://${document.location.hostname}:3001`);
 
   function join() {
-    let message = "What is your name?";
-    if (name) message = `${name} is already taken. Please choose another name.`;
-    customPrompt(message, (value: string) => {
-      name = value;
-      socket.emit("join", { id: playerId, name });
-    });
+    socket.emit("join", { id: playerId, name: playerId });
+    // let message = "What is your name?";
+    // if (name) message = `${name} is already taken. Please choose another name.`;
+    // customPrompt(message, (value: string) => {
+    //   name = value;
+    //   socket.emit("join", { id: playerId, name });
+    // });
   }
 
   socket.on("connect", function() {
@@ -62,7 +63,6 @@ export function run() {
     console.log(`${leftName} has left the game`);
   });
   socket.on("gameState", function(data: GameState) {
-    console.log("received gameState", data);
     render(data);
   });
   socket.on("disconnect", function() {
