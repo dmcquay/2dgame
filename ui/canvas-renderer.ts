@@ -37,5 +37,4 @@ function renderPlayer(
   const [x, y] = translateCoords(playerState.x, playerState.y, canvas);
   ctx.fillStyle = playerState.color;
   ctx.fillRect(x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
-  // ctx.drawImage(playerImg, x, y, CELL_SIZE, CELL_SIZE);
 }
