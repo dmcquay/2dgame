@@ -32,7 +32,6 @@ const keyIsDownMap: { [key: string]: boolean } = {};
 
 export function run() {
   const playerId = uuid.v4();
-  console.log("starting game...");
   const socket = io("http://localhost:3001");
 
   function join() {

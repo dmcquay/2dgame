@@ -142,7 +142,3 @@ function movePlayer(playerId: string) {
 }
 
 setInterval(movePlayers, 20);
-
-// start game, return game state
-// join game by id
-// start moving (direction)
