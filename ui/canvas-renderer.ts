@@ -5,7 +5,9 @@ export function render(state: GameState) {
   updateCanvasSize(canvas);
   const ctx = canvas.getContext("2d");
   clearCanvas(canvas, ctx);
-  state.players.forEach(player => renderPlayer(player, canvas, ctx));
+  Object.values(state.players).forEach(player =>
+    renderPlayer(player, canvas, ctx)
+  );
 }
 
 function updateCanvasSize(canvas: HTMLCanvasElement) {

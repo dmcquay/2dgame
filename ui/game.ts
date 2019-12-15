@@ -1,3 +1,4 @@
+import uuid from "uuid";
 import { render } from "./canvas-renderer";
 import { GameState } from "./types";
 
@@ -28,6 +29,7 @@ function customPrompt(message: string, cb: Function) {
 }
 
 export function run() {
+  const playerId = uuid.v4();
   console.log("starting game...");
   const socket = io("http://localhost:3001");
 
@@ -36,7 +38,7 @@ export function run() {
     if (name) message = `${name} is already taken. Please choose another name.`;
     customPrompt(message, (value: string) => {
       name = value;
-      socket.emit("join", { name });
+      socket.emit("join", { id: playerId, name });
     });
   }
 
@@ -64,5 +66,22 @@ export function run() {
   });
   socket.on("disconnect", function() {
     console.log("disconnected");
+  });
+
+  window.addEventListener("keydown", event => {
+    console.log(event.key);
+    if (!/^Arrow[Up|Down|Left|Right]$/.test(event.key)) {
+      return;
+    }
+    const direction = event.key.replace("Arrow", "").toLowerCase();
+    socket.emit("startMoving", { direction });
+  });
+
+  window.addEventListener("keyup", event => {
+    if (!/^Arrow[Up|Down|Left|Right]$/.test(event.key)) {
+      return;
+    }
+    const direction = event.key.replace("Arrow", "").toLowerCase();
+    socket.emit("stopMoving", { direction });
   });
 }
