@@ -1,3 +1,5 @@
+import * as R from "ramda";
+
 import { GameState, PlayerState } from "./types";
 
 export const MOVE_PX_PER_INTERVAL = 5;
@@ -9,6 +11,15 @@ export function buildInitialGameState(): GameState {
   return {
     players: {}
   };
+}
+
+function getLeastUsedCarIdx(gameState: GameState): number {
+  const options = [0, 1, 2, 3, 4];
+  const getCount = (idx: number) =>
+    Object.values(gameState.players).filter(player => player.carIdx === idx)
+      .length;
+  const sortedOptions = R.sortBy(getCount, options);
+  return sortedOptions[0];
 }
 
 export function buildPlayer(id: string, name: string) {
@@ -34,16 +45,14 @@ export function addPlayer(
 ): GameState {
   return {
     ...gameState,
-    players: { ...gameState.players, [id]: buildPlayer(id, name) }
+    players: {
+      ...gameState.players,
+      [id]: {
+        ...buildPlayer(id, name),
+        carIdx: getLeastUsedCarIdx(gameState)
+      }
+    }
   };
-}
-
-function getCode() {
-  return Math.floor(Math.random() * 150);
-}
-
-function getAvailableColor() {
-  return `rgb(${getCode()}, ${getCode()}, ${getCode()})`;
 }
 
 function increaseVelocityTo(maxVelocity: number, playerState: PlayerState) {
