@@ -12,7 +12,7 @@ export interface PlayerState {
   turningRight: boolean;
 }
 
-interface PlayerMap {
+export interface PlayerMap {
   [key: string]: PlayerState;
 }
 

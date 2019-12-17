@@ -1,48 +1,26 @@
 import SocketIo from "socket.io";
 import * as R from "ramda";
 
-interface PlayerState {
-  id: string;
-  name: string;
-  color: string;
-  x: number;
-  y: number;
-  moving: {
-    up: boolean;
-    down: boolean;
-    left: boolean;
-    right: boolean;
-  };
-}
+import { headingAndVelocityToVector, addVectorToPoint } from "./geometry2d";
+import {
+  buildInitialGameState,
+  addPlayer,
+  modifyVelocity,
+  modifyHeading
+} from "./state-utils";
 
-interface PlayerMap {
-  [key: string]: PlayerState;
-}
-
-interface GameState {
-  players: PlayerMap;
-}
-
-let gameState: GameState = {
-  players: {}
-};
-
-function getCode() {
-  return Math.floor(Math.random() * 150);
-}
-
-function getAvailableColor() {
-  return `rgb(${getCode()}, ${getCode()}, ${getCode()})`;
-}
+let gameState = buildInitialGameState();
 
 const io = SocketIo();
 io.on("connection", client => {
   let playerId: string;
   console.log("client connected");
+
   client.on("action", data => {
     console.log("received action", data);
     io.emit("gameState", gameState);
   });
+
   client.on("join", ({ id, name }) => {
     if (
       Object.values(gameState.players).filter(p => p.name === name).length > 0
@@ -50,45 +28,84 @@ io.on("connection", client => {
       client.emit("nameUnavailable");
       return;
     }
-    const newPlayer: PlayerState = {
-      id,
-      name,
-      color: getAvailableColor(),
-      x: Math.floor(Math.random() * 800) - 400,
-      y: Math.floor(Math.random() * 600) - 300,
-      moving: {
-        up: false,
-        down: false,
-        left: false,
-        right: false
-      }
-    };
-    gameState = {
-      ...gameState,
-      players: { ...gameState.players, [id]: newPlayer }
-    };
+    gameState = addPlayer(id, name, gameState);
     io.emit("gameState", gameState);
     io.emit("playerJoined", { id, name });
     playerId = id;
   });
-  client.on("startMoving", (data: any) => {
-    const { direction } = data;
+
+  client.on("startAcceleratingForward", () => {
     gameState = R.set(
-      R.lensPath(["players", playerId, "moving", direction]),
+      R.lensPath(["players", playerId, "acceleratingForward"]),
       true,
       gameState
     );
     io.emit("gameState", gameState);
   });
-  client.on("stopMoving", (data: any) => {
-    const { direction } = data;
+
+  client.on("stopAcceleratingForward", () => {
     gameState = R.set(
-      R.lensPath(["players", playerId, "moving", direction]),
+      R.lensPath(["players", playerId, "acceleratingForward"]),
       false,
       gameState
     );
     io.emit("gameState", gameState);
   });
+
+  client.on("startAcceleratingBackward", () => {
+    gameState = R.set(
+      R.lensPath(["players", playerId, "acceleratingBackward"]),
+      true,
+      gameState
+    );
+    io.emit("gameState", gameState);
+  });
+
+  client.on("stopAcceleratingBackward", () => {
+    gameState = R.set(
+      R.lensPath(["players", playerId, "acceleratingBackward"]),
+      false,
+      gameState
+    );
+    io.emit("gameState", gameState);
+  });
+
+  client.on("startTurningLeft", () => {
+    gameState = R.set(
+      R.lensPath(["players", playerId, "turningLeft"]),
+      true,
+      gameState
+    );
+    io.emit("gameState", gameState);
+  });
+
+  client.on("stopTurningLeft", () => {
+    gameState = R.set(
+      R.lensPath(["players", playerId, "turningLeft"]),
+      false,
+      gameState
+    );
+    io.emit("gameState", gameState);
+  });
+
+  client.on("startTurningRight", () => {
+    gameState = R.set(
+      R.lensPath(["players", playerId, "turningRight"]),
+      true,
+      gameState
+    );
+    io.emit("gameState", gameState);
+  });
+
+  client.on("stopTurningRight", () => {
+    gameState = R.set(
+      R.lensPath(["players", playerId, "turningRight"]),
+      false,
+      gameState
+    );
+    io.emit("gameState", gameState);
+  });
+
   client.on("disconnect", () => {
     console.log("client disconnected");
     if (!gameState.players[playerId]) return;
@@ -101,44 +118,31 @@ io.on("connection", client => {
     io.emit("playerLeft", { name: playerName, id: playerId });
   });
 });
+
 io.listen(3001);
 
 function movePlayers() {
   const playerIds = Object.keys(gameState.players);
-  const changed = playerIds.map(movePlayer);
-  if (changed.find(x => x === true)) {
-    io.emit("gameState", gameState);
-  }
+  playerIds.forEach(movePlayer);
+  io.emit("gameState", gameState);
 }
 
-const MOVE_PX_PER_INTERVAL = 5;
-
 function movePlayer(playerId: string) {
-  const player = gameState.players[playerId];
+  let player = gameState.players[playerId];
 
-  let x = player.x;
-  if (player.moving.left) {
-    x -= MOVE_PX_PER_INTERVAL;
-  } else if (player.moving.right) {
-    x += MOVE_PX_PER_INTERVAL;
-  }
+  player = modifyHeading(player);
+  player = modifyVelocity(player);
 
-  let y = player.y;
-  if (player.moving.up) {
-    y -= MOVE_PX_PER_INTERVAL;
-  } else if (player.moving.down) {
-    y += MOVE_PX_PER_INTERVAL;
-  }
+  const vector = headingAndVelocityToVector(
+    player.headingDegrees,
+    player.velocity
+  );
+  const startPoint = { x: player.x, y: player.y };
+  const endPoint = addVectorToPoint(startPoint, vector);
+  player.x = endPoint.x;
+  player.y = endPoint.y;
 
-  if (player.x !== x) {
-    gameState = R.set(R.lensPath(["players", playerId, "x"]), x, gameState);
-  }
-
-  if (player.y !== y) {
-    gameState = R.set(R.lensPath(["players", playerId, "y"]), y, gameState);
-  }
-
-  return player.x !== x || player.y !== y;
+  gameState = R.set(R.lensPath(["players", playerId]), player, gameState);
 }
 
 setInterval(movePlayers, 20);

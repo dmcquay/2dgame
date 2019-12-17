@@ -34,6 +34,11 @@ export function run() {
   const playerId = uuid.v4();
   const socket = io(`http://${document.location.hostname}:3001`);
 
+  function emitAndLog(eventName: string) {
+    socket.emit(eventName);
+    console.log("emitting", eventName);
+  }
+
   function join() {
     socket.emit("join", { id: playerId, name: playerId });
     // let message = "What is your name?";
@@ -62,7 +67,23 @@ export function run() {
     const { name: leftName } = data;
     console.log(`${leftName} has left the game`);
   });
+  let gameState: GameState | undefined = undefined;
   socket.on("gameState", function(data: GameState) {
+    if (gameState && gameState.players[playerId]) {
+      if (
+        gameState.players[playerId].headingDegrees !==
+        data.players[playerId].headingDegrees
+      ) {
+        console.log("heading", data.players[playerId].headingDegrees);
+      }
+
+      if (
+        gameState.players[playerId].velocity !== data.players[playerId].velocity
+      ) {
+        console.log("velocity", data.players[playerId].velocity);
+      }
+    }
+    gameState = data;
     render(data);
   });
   socket.on("disconnect", function() {
@@ -72,22 +93,30 @@ export function run() {
   window.addEventListener("keydown", event => {
     if (keyIsDownMap[event.key] === true) return;
     keyIsDownMap[event.key] = true;
-    if (!/^Arrow(Up|Down|Left|Right)$/.test(event.key)) {
-      return;
+
+    if (event.key === "ArrowUp") {
+      emitAndLog("startAcceleratingForward");
+    } else if (event.key === "ArrowDown") {
+      emitAndLog("startAcceleratingBackward");
+    } else if (event.key === "ArrowLeft") {
+      emitAndLog("startTurningLeft");
+    } else if (event.key === "ArrowRight") {
+      emitAndLog("startTurningRight");
     }
-    const direction = event.key.replace("Arrow", "").toLowerCase();
-    console.log("start moving", direction);
-    socket.emit("startMoving", { direction });
   });
 
   window.addEventListener("keyup", event => {
     if (keyIsDownMap[event.key] === false) return;
     keyIsDownMap[event.key] = false;
-    if (!/^Arrow(Up|Down|Left|Right)$/.test(event.key)) {
-      return;
+
+    if (event.key === "ArrowUp") {
+      emitAndLog("stopAcceleratingForward");
+    } else if (event.key === "ArrowDown") {
+      emitAndLog("stopAcceleratingBackward");
+    } else if (event.key === "ArrowLeft") {
+      emitAndLog("stopTurningLeft");
+    } else if (event.key === "ArrowRight") {
+      emitAndLog("stopTurningRight");
     }
-    const direction = event.key.replace("Arrow", "").toLowerCase();
-    console.log("stop moving", direction);
-    socket.emit("stopMoving", { direction });
   });
 }
