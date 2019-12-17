@@ -1,8 +1,8 @@
 import { GameState, PlayerState } from "./types";
 
 export const MOVE_PX_PER_INTERVAL = 5;
-export const MAX_VELOCITY = 1;
-export const VELOCITY_CHANGE_PER_INTERVAL = 0.1;
+export const MAX_VELOCITY = 10;
+export const VELOCITY_CHANGE_PER_INTERVAL = 1;
 export const HEADING_CHANGE_PER_INTERVAL = 5;
 
 export function buildInitialGameState(): GameState {
@@ -16,8 +16,8 @@ export function buildPlayer(id: string, name: string) {
     id,
     name,
     color: getAvailableColor(),
-    x: Math.floor(Math.random() * 800) - 400,
-    y: Math.floor(Math.random() * 600) - 300,
+    x: 0, //Math.floor(Math.random() * 800) - 400,
+    y: 0, //Math.floor(Math.random() * 600) - 300,
     velocity: 0,
     headingDegrees: Math.round(Math.random() * 360),
     acceleratingForward: false,

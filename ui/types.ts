@@ -19,3 +19,8 @@ interface PlayerMap {
 export interface GameState {
   players: PlayerMap;
 }
+
+export interface Point {
+  x: number;
+  y: number;
+}

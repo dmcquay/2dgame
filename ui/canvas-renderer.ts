@@ -1,4 +1,4 @@
-import { GameState, PlayerState } from "./types";
+import { GameState, PlayerState, Point } from "./types";
 
 export function render(state: GameState) {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -42,6 +42,35 @@ function renderPlayer(
 ) {
   const playerSize = 50;
   const [x, y] = translateCoords(playerState.x, playerState.y, canvas);
-  ctx.fillStyle = playerState.color;
-  ctx.fillRect(x - playerSize / 2, y - playerSize / 2, playerSize, playerSize);
+
+  withRotation(ctx, { x, y }, playerState.headingDegrees * -1, () => {
+    ctx.fillStyle = playerState.color;
+    ctx.fillRect(
+      x - playerSize / 2,
+      y - playerSize / 2,
+      playerSize,
+      playerSize
+    );
+  });
+}
+
+function rotateCtx(
+  centerPoint: Point,
+  degrees: number,
+  ctx: CanvasRenderingContext2D
+) {
+  ctx.translate(centerPoint.x, centerPoint.y);
+  ctx.rotate((degrees * Math.PI) / 180);
+  ctx.translate(centerPoint.x * -1, centerPoint.y * -1);
+}
+
+function withRotation(
+  ctx: CanvasRenderingContext2D,
+  centerPoint: Point,
+  degrees: number,
+  cb: Function
+) {
+  rotateCtx(centerPoint, degrees, ctx);
+  cb();
+  rotateCtx(centerPoint, degrees * -1, ctx);
 }
