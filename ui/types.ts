@@ -1,7 +1,7 @@
 export interface PlayerState {
   id: string;
   name: string;
-  color: string;
+  carIdx: number;
   x: number;
   y: number;
   velocity: number;

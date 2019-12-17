@@ -1,5 +1,10 @@
 import { GameState, PlayerState, Point } from "./types";
 
+const carsSpriteImg = new Image();
+carsSpriteImg.src = "/static/images/cars-sprite.png";
+let carsSpriteImgIsReady = false;
+carsSpriteImg.addEventListener("load", e => (carsSpriteImgIsReady = true));
+
 export function render(state: GameState) {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   updateCanvasSize(canvas);
@@ -40,16 +45,23 @@ function renderPlayer(
   canvas: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D
 ) {
-  const playerSize = 50;
+  if (!carsSpriteImgIsReady) return;
+
+  const carWidth = 77;
+  const carHeight = 128;
   const [x, y] = translateCoords(playerState.x, playerState.y, canvas);
 
-  withRotation(ctx, { x, y }, playerState.headingDegrees * -1, () => {
-    ctx.fillStyle = playerState.color;
-    ctx.fillRect(
-      x - playerSize / 2,
-      y - playerSize / 2,
-      playerSize,
-      playerSize
+  withRotation(ctx, { x, y }, (playerState.headingDegrees - 90) * -1, () => {
+    ctx.drawImage(
+      carsSpriteImg,
+      playerState.carIdx * carWidth,
+      0,
+      carWidth,
+      carHeight,
+      x - carWidth / 2,
+      y - carHeight / 2,
+      carWidth,
+      carHeight
     );
   });
 }
