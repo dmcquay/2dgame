@@ -96,19 +96,23 @@ export function modifyVelocity(playerState: PlayerState): PlayerState {
 }
 
 export function modifyHeading(playerState: PlayerState): PlayerState {
+  if (playerState.velocity === 0) return playerState;
+
+  const changeFactor =
+    HEADING_CHANGE_PER_INTERVAL *
+    (Math.abs(playerState.velocity) / MAX_VELOCITY);
+
   if (playerState.turningLeft) {
     return {
       ...playerState,
-      headingDegrees:
-        (playerState.headingDegrees + HEADING_CHANGE_PER_INTERVAL) % 360
+      headingDegrees: (playerState.headingDegrees + changeFactor) % 360
     };
   }
 
   if (playerState.turningRight) {
     return {
       ...playerState,
-      headingDegrees:
-        (360 + playerState.headingDegrees - HEADING_CHANGE_PER_INTERVAL) % 360
+      headingDegrees: (360 + playerState.headingDegrees - changeFactor) % 360
     };
   }
 

@@ -93,10 +93,31 @@ describe("state-utils", () => {
   });
 
   describe("#modifyHeading", () => {
+    it("when turning left but not moving should not change heading", () => {
+      const player = buildTestPlayer();
+      player.headingDegrees = 0;
+      player.turningLeft = true;
+      player.velocity = 0;
+      const updatedPlayer = modifyHeading(player);
+      expect(updatedPlayer.headingDegrees).to.equal(0);
+    });
+
+    it("when turning left but moving at half of max velocity should not change heading by half", () => {
+      const player = buildTestPlayer();
+      player.headingDegrees = 0;
+      player.turningLeft = true;
+      player.velocity = MAX_VELOCITY / 2;
+      const updatedPlayer = modifyHeading(player);
+      expect(updatedPlayer.headingDegrees).to.equal(
+        HEADING_CHANGE_PER_INTERVAL / 2
+      );
+    });
+
     it("when turning left", () => {
       const player = buildTestPlayer();
       player.headingDegrees = 0;
       player.turningLeft = true;
+      player.velocity = MAX_VELOCITY;
       const updatedPlayer = modifyHeading(player);
       expect(updatedPlayer.headingDegrees).to.equal(
         HEADING_CHANGE_PER_INTERVAL
@@ -107,6 +128,7 @@ describe("state-utils", () => {
       const player = buildTestPlayer();
       player.headingDegrees = 359;
       player.turningLeft = true;
+      player.velocity = MAX_VELOCITY;
       const updatedPlayer = modifyHeading(player);
       expect(updatedPlayer.headingDegrees).to.equal(
         HEADING_CHANGE_PER_INTERVAL - 1
@@ -117,6 +139,7 @@ describe("state-utils", () => {
       const player = buildTestPlayer();
       player.headingDegrees = 360;
       player.turningRight = true;
+      player.velocity = MAX_VELOCITY;
       const updatedPlayer = modifyHeading(player);
       expect(updatedPlayer.headingDegrees).to.equal(
         360 - HEADING_CHANGE_PER_INTERVAL
@@ -127,6 +150,7 @@ describe("state-utils", () => {
       const player = buildTestPlayer();
       player.headingDegrees = 1;
       player.turningRight = true;
+      player.velocity = MAX_VELOCITY;
       const updatedPlayer = modifyHeading(player);
       expect(updatedPlayer.headingDegrees).to.equal(
         360 - HEADING_CHANGE_PER_INTERVAL + 1
@@ -136,6 +160,7 @@ describe("state-utils", () => {
     it("when not turning", () => {
       const player = buildTestPlayer();
       player.headingDegrees = 0;
+      player.velocity = MAX_VELOCITY;
       const updatedPlayer = modifyHeading(player);
       expect(updatedPlayer.headingDegrees).to.equal(0);
     });
