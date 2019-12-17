@@ -2,9 +2,8 @@ import * as R from "ramda";
 
 import { GameState, PlayerState } from "./types";
 
-export const MOVE_PX_PER_INTERVAL = 5;
-export const MAX_VELOCITY = 10;
-export const VELOCITY_CHANGE_PER_INTERVAL = 1;
+export const MAX_VELOCITY = 16;
+export const VELOCITY_CHANGE_PER_INTERVAL = MAX_VELOCITY / 20;
 export const HEADING_CHANGE_PER_INTERVAL = 5;
 
 export function buildInitialGameState(): GameState {
