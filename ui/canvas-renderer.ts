@@ -24,8 +24,15 @@ function clearCanvas(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function translateCoords(x: number, y: number, canvas: HTMLCanvasElement) {
-  return [x + Math.floor(canvas.width / 2), y + Math.floor(canvas.height / 2)];
+export function translateCoords(
+  x: number,
+  y: number,
+  canvas: HTMLCanvasElement
+) {
+  return [
+    x + Math.floor(canvas.width / 2),
+    y * -1 + Math.floor(canvas.height / 2)
+  ];
 }
 
 function renderPlayer(

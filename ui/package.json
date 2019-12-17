@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "test": "ts-mocha *.test.ts",
+    "test:watch": "mocha --require ts-node/register *.test.ts --watch-extensions ts --watch",
     "dev": "parcel index.html --public-url /static"
   },
   "dependencies": {
