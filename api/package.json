@@ -9,7 +9,7 @@
     "dev": "ts-node-dev src/server.ts"
   },
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "ramda": "^0.26.1",
     "socket.io": "^2.3.0"
   },
